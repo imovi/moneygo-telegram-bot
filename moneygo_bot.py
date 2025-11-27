@@ -12,6 +12,8 @@ RATES_URL = "https://api.money-go.com/api/currencies/rates"
 import os
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
+ADMIN_ID = 852271924   # তোমার chat id
+
 
 TELEGRAM_API_BASE = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
@@ -389,4 +391,5 @@ if __name__ == "__main__":
     t = Thread(target=auto_loop, daemon=True)
     t.start()
     command_loop()
+
 
