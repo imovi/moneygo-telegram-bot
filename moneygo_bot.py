@@ -4,6 +4,8 @@ import os
 import json
 from datetime import datetime, timedelta
 from threading import Thread
+os.environ['TZ']='Asia/Dhaka'
+time.tzset()
 
 # ------------ CONFIG ------------
 
@@ -391,5 +393,6 @@ if __name__ == "__main__":
     t = Thread(target=auto_loop, daemon=True)
     t.start()
     command_loop()
+
 
 
