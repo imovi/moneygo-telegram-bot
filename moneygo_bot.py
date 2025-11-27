@@ -1,21 +1,27 @@
-import time
-import requests
 import os
+import time
 import json
+import requests
 from datetime import datetime, timedelta
 from threading import Thread
-os.environ['TZ']='Asia/Dhaka'
+
+# ----- TIMEZONE (BD Time) -----
+os.environ['TZ'] = 'Asia/Dhaka'
 time.tzset()
 
 # ------------ CONFIG ------------
 
 RATES_URL = "https://api.money-go.com/api/currencies/rates"
 
-import os
+# Render এ চালালে BOT_TOKEN, CHAT_ID env variable হিসেবে সেট করো
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-ADMIN_ID = 852271924   # তোমার chat id
 
+# যদি PC থেকে চালাও, তাহলে উপরের দুই লাইনের বদলে নিচের মত করে লিখতে পারো:
+# BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+# CHAT_ID = "852271924"   # বা তোমার চ্যাট আইডি
+
+ADMIN_ID = 852271924   # তোমার chat id (stats command শুধু তোমাকে দেখাবে)
 
 TELEGRAM_API_BASE = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
@@ -53,10 +59,12 @@ def get_pair_rate(base: str, quote: str):
     resp.raise_for_status()
     data = resp.json()
 
+    # সরাসরি base/quote থাকলে
     for item in data["data"]:
         if item["name"] == pair1:
             return float(item["value"]), pair1, False
 
+    # না থাকলে inverse pair দেখি
     for item in data["data"]:
         if item["name"] == pair2:
             v = float(item["value"])
@@ -215,7 +223,7 @@ def format_usd_message(current, last, high, high_time, low, low_time):
 
 def format_pair_message(base, quote, rate, api_pair, inverted):
     """
-    base/quote রেট show করার message
+    /rate usd/try টাইপ কমান্ডের জন্য generic message
     """
     now_str = datetime.now().strftime('%d %b %I:%M %p')
     base = base.upper()
@@ -323,7 +331,7 @@ def command_loop():
                     base, quote = parse_rate_command(text)
                     try:
                         rate, api_pair, inverted = get_pair_rate(base, quote)
-                        # যদি USD/BDT হয়, extra stats দেখাই
+                        # যদি USD/BDT হয়, extra stats
                         if base.upper() == "USD" and quote.upper() == "BDT":
                             history = update_history(rate)
                             high, high_time, low, low_time = get_stats_last_24h(history)
@@ -333,9 +341,14 @@ def command_loop():
                         tg_send(chat_id, reply)
                     except Exception as e:
                         print("[CMD] rate error:", e)
-                        tg_send(chat_id, "❌ এই pair টা পাওয়া যায়নি। যেমন: `/rate usd/bdt`", parse_mode="Markdown")
+                        tg_send(
+                            chat_id,
+                            "❌ এই pair টা পাওয়া যায়নি। যেমন: `/rate usd/bdt`",
+                            parse_mode="Markdown",
+                        )
                     continue
 
+                # /start message
                 if text.startswith("/start"):
                     tg_send(
                         chat_id,
@@ -350,7 +363,7 @@ def command_loop():
                         "Commands:\n"
                         "`/rate` – USD/BDT রেট\n"
                         "`/rate usd/try` – যেকোনো pair\n",
-                        parse_mode="Markdown"
+                        parse_mode="Markdown",
                     )
 
         except Exception as e:
@@ -393,6 +406,3 @@ if __name__ == "__main__":
     t = Thread(target=auto_loop, daemon=True)
     t.start()
     command_loop()
-
-
-
