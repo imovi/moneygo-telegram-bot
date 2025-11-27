@@ -9,8 +9,9 @@ from threading import Thread
 
 RATES_URL = "https://api.money-go.com/api/currencies/rates"
 
-BOT_TOKEN = "8348438143:AAGPfBe9Sl32sK78UShMV6IpAJMO1-nTz5k"   # <- এখানে নিজের টোকেন বসাও
-ADMIN_ID = 852271924                    # <- তোমার chat id
+import os
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 TELEGRAM_API_BASE = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
@@ -388,3 +389,4 @@ if __name__ == "__main__":
     t = Thread(target=auto_loop, daemon=True)
     t.start()
     command_loop()
+
